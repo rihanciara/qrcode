@@ -1,12 +1,4 @@
-	<div class="payment_row" @if($is_enabled_download_pdf) id="payment_rows_div" @endif>
-					<div class="row">
-						<div class="col-md-12 mb-12">
-							<strong>@lang('lang_v1.advance_balance'):</strong> <span id="advance_balance_text"></span>
-							{!! Form::hidden('advance_balance', null, ['id' => 'advance_balance', 'data-error-msg' => __('lang_v1.required_advance_balance_not_available')]); !!}
-						</div>
-					</div>
-          
-          <div class="row">
+<div class="row">
 	<input type="hidden" class="payment_row_index" value="{{ $row_index}}">
 	@php
 		$col_class = 'col-md-6';
@@ -15,6 +7,17 @@
 		}
 		$readonly = $payment_line['method'] == 'advance' ? true : false;
 	@endphp
+	
+	@if($payment_line['method'] == 'advance')
+    @php
+        $amount = $payment_line['amount'] - $advance_balance;
+    @endphp
+@else
+    @php
+        $amount = $payment_line['amount'];
+    @endphp
+@endif
+
 	<div class="{{$col_class}}">
 		<div class="form-group">
 			{!! Form::label("amount_$row_index" ,__('sale.amount') . ':*') !!}
