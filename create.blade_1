@@ -722,7 +722,8 @@
 					<input type="hidden" name="final_total" id="final_total_input">
 					<span id="total_payable">0</span>
 				</div>
-		    </div>
+			  <small class="text-danger hide contact_due_text"><strong>@lang('account.customer_due'):</strong> <span></span></small>
+		    </div>  
 			@endcomponent
 		</div>
 	</div>
@@ -1021,10 +1022,13 @@
         // Set the total stayed days in custom_field_3
         $('#custom_field_3').val(stay_days);
     }
-});
+        });
+        
+       
 
 
     });
+    
     
 </script>
 
