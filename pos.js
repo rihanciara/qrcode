@@ -287,113 +287,36 @@ $(document).ready(function() {
     }
 
     //Update line total and check for quantity not greater than max quantity
-var defaultQuantity = null; // Variable to store the default quantity
+    $('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
+        if (sell_form_validator) {
+            sell_form.valid();
+        }
+        if (pos_form_validator) {
+            pos_form_validator.element($(this));
+        }
+        // var max_qty = parseFloat($(this).data('rule-max'));
+        var entered_qty = __read_number($(this));
 
-// Add an input field for entering the area
-var areaInput = $('<input>').attr('type', 'number').addClass('area_input');
-$('#pos_table').before('Enter Area: ').before(areaInput);
+        var tr = $(this).parents('tr');
 
-// Event handler for area input change
-areaInput.on('change', function() {
-  var area = parseFloat($(this).val());
-  if (!isNaN(area) && area >= 0) {
-    defaultQuantity = area; // Set the area as the default quantity
+        var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
+        var line_total = entered_qty * unit_price_inc_tax;
 
-    // Update the default quantity for the existing rows
-    $('table#pos_table tbody tr').each(function() {
-      var tr = $(this);
-      var quantityInput = tr.find('input.pos_quantity');
-      var entered_qty = __read_number(quantityInput);
-      if (entered_qty !== defaultQuantity) {
-        quantityInput.val(defaultQuantity);
+        __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
+        tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
 
-        // Calculate and update the line total for the row
-        calculateLineTotal(tr);
-      }
+        //Change modifier quantity
+        tr.find('.modifier_qty_text').each( function(){
+            $(this).text(__currency_trans_from_en(entered_qty, false));
+        });
+        tr.find('.modifiers_quantity').each( function(){
+            $(this).val(entered_qty);
+        });
+
+        pos_total_row();
+
+        adjustComboQty(tr);
     });
-
-    // Recalculate the totals
-    calculateTotals();
-  }
-});
-
-$('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
-  if (sell_form_validator) {
-    sell_form.valid();
-  }
-  if (pos_form_validator) {
-    pos_form_validator.element($(this));
-  }
-
-  var tr = $(this).parents('tr');
-  calculateLineTotal(tr);
-
-  // Recalculate the totals
-  calculateTotals();
-
-  pos_total_row();
-
-  adjustComboQty(tr);
-});
-
-function calculateLineTotal(tr) {
-  var entered_qty = __read_number(tr.find('input.pos_quantity'));
-  var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
-  var line_total = entered_qty * unit_price_inc_tax;
-
-  __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
-  tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
-}
-
-function calculateTotals() {
-  var subtotal = 0;
-
-  $('table#pos_table tbody tr').each(function() {
-    var line_total = __read_number($(this).find('input.pos_line_total'));
-    subtotal += line_total;
-  });
-
-  // Update the subtotal value wherever it needs to be displayed
-  $('#subtotal').text(__currency_trans_from_en(subtotal, true));
-
-  // Calculate tax amount if needed
-  var tax = 0;
-
-  // Calculate discount amount if needed
-  var discount = 0;
-
-  var total = subtotal + tax;
-  var total_payable = total - discount;
-
-  // Update the total value wherever it needs to be displayed
-  $('#total').text(__currency_trans_from_en(total, true));
-
-  // Update the total payable value wherever it needs to be displayed
-  $('#total_payable').text(__currency_trans_from_en(total_payable, true));
-}
-
-
-function adjustComboQty(tr) {
-  // Rest of your code for adjusting the combo quantity...
-}
-
-function __read_number(input) {
-  // Function to read the numeric value from an input field
-  // You can replace this with your own implementation
-  return parseFloat(input.val());
-}
-
-function __write_number(input, value, format, precision) {
-  // Function to write a numeric value to an input field
-  // You can replace this with your own implementation
-  input.val(value.toFixed(precision));
-}
-
-function __currency_trans_from_en(value, symbol) {
-  // Function to translate a numeric value to a currency format
-  // You can replace this with your own implementation
-  return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
-}
 
     //If change in unit price update price including tax and line total
     $('table#pos_table tbody').on('change', 'input.pos_unit_price', function() {
